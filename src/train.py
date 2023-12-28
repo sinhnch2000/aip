@@ -15,7 +15,8 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils.versions import require_version
 
 from .arguments import ModelArguments, DataTrainingArguments
-from .dataloader.dataloader_GradSearch import StateProcessing
+from .dataloaders.dataloader_GradDST import StateProcessing
+from .dataloaders.dataloader_GradRES import ResDataLoader
 
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
@@ -95,7 +96,7 @@ def main():
     )
 
     # Dataset
-    dataset = StateProcessing(
+    dataset = ResDataLoader(
         tokenizer,
         train_file = data_args.train_file,
         val_file = data_args.validation_file,
