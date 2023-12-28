@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0,1 accelerate launch \
+CUDA_VISIBLE_DEVICES=0 accelerate launch \
         --use_fsdp \
         --mixed_precision=bf16 \
         --fsdp_auto_wrap_policy=TRANSFORMER_BASED_WRAP  \
