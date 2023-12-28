@@ -86,15 +86,15 @@ class ResDataLoader:
             where tokens are padded, and the target IDs are masked to exclude padded values.
         """
 
-        def mapping_sample(samples):
+        def mapping_sample(examples):
             inputs, targets = [], []
-            for sample in samples:
+            for idx in range(len(examples['instruction'])):
     
-                item = sample['instruction'] \
-                    .replace('{context}', sample['context'].strip()) \
-                    .replace('{ontology}', sample['ontology'].strip()) \
-                    .replace('{system_action}', sample['system_action'].strip()) \
-                    .replace('{documents}', sample['documents'].strip()) \
+                item = examples['instruction'][idx] \
+                    .replace('{context}', examples['context'][idx].strip()) \
+                    .replace('{ontology}', examples['ontology'][idx].strip()) \
+                    .replace('{system_action}', examples['system_action'][idx].strip()) \
+                    .replace('{documents}', examples['documents'][idx].strip()) \
                     .replace('\s+', ' ') \
                     .replace(' |  | .', '.') \
                     .replace(' | .', '.') \
@@ -102,7 +102,7 @@ class ResDataLoader:
                     .replace(' |  | ','')
 
                 inputs.append(re.sub('\s+', ' ', item))
-                targets.append(re.sub('\s+', ' ', sample['response'].strip()))
+                targets.append(re.sub('\s+', ' ', examples['response'][idx].strip()))
 
             return inputs, targets
 
