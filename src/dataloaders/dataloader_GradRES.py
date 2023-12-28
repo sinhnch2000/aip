@@ -1,28 +1,22 @@
-import os
-import torch
 import re
 
 from typing import Optional, List, Union, Set
 from datasets import DatasetDict, load_dataset, concatenate_datasets
-from torch.utils.data import RandomSampler, SequentialSampler
-from torch.utils.data.dataloader import DataLoader
-from transformers import AutoTokenizer
 
 
 class ResDataLoader:
     def __init__(self,
-                 model_name: str,
-                 train_file: Union[str, List[str]] = None,
-                 val_file: Optional[Union[str, List[str]]] = None,
+                 tokenizer: str,
+                 train_file: Optional[Union[str, List[str]]],
+                 val_file: Optional[Union[str, List[str]]],
                  test_file: Optional[Union[str, List[str]]] = None,
                  batch_size: int = 8,
-                 seed: int = 42,
                  max_train_samples: Optional[int] = None,
                  max_eval_samples: Optional[int] = None,
                  max_predict_samples: Optional[int] = None
                  ) -> None:
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.tokenizer = tokenizer
 
         self.train_file = train_file
         self.val_file = val_file
@@ -33,34 +27,31 @@ class ResDataLoader:
         self.max_eval_samples = max_eval_samples
         self.max_predict_samples = max_predict_samples
 
-        self.seed = seed
-        self.generator = torch.Generator().manual_seed(seed)
-
-    def __call__(self, *args, **kwargs) -> Union[Set[DataLoader], Set]:
-        dataloaders = {}
+    def __call__(self, *args, **kwargs):
+        dataset = {}
 
         if self.train_file is not None:
             print('\nLoading train datasets' + '.' * 10)
             train_dataset = self.load_data('train', self.train_file)
             if self.max_train_samples is not None:
                 train_dataset = train_dataset.select(range(self.max_train_samples))
-            dataloaders['train'] = self.get_dataloader(train_dataset, shuffle_flag=True)
+            dataset['train'] = self.process_fn(train_dataset)
 
         if self.val_file is not None:
             print('\nLoading validation datasets' + '.' * 10)
             eval_dataset = self.load_data('val', self.val_file)
             if self.max_eval_samples is not None:
                 eval_dataset = eval_dataset.select(range(self.max_eval_samples))
-            dataloaders['eval'] = self.get_dataloader(eval_dataset)
+            dataset['eval'] = self.process_fn(eval_dataset)
 
         if self.test_file is not None:
             print('\nLoading test datasets' + '.' * 10)
             test_dataset = self.load_data('test', self.test_file)
             if self.max_predict_samples is not None:
                 test_dataset = test_dataset.select(range(self.max_predict_samples))
-            dataloaders['test'] = self.get_dataloader(test_dataset)
+            dataset['test'] = self.process_fn(test_dataset)
 
-        return dataloaders
+        return dataset
 
     def load_data(self, key: str, data_file: List[str]) -> DatasetDict:
         """
@@ -78,16 +69,11 @@ class ResDataLoader:
             dataset loaded from the data_file path.
         """
 
-        dataset_list = []
-        for file in data_file:
-            data_files = {key: file}
-            extension = file.split(".")[-1]
-            dataset_list.append(load_dataset(extension, data_files=data_files, split=key))
-        dataset = concatenate_datasets(dataset_list)
-        dataset.shuffle(self.seed)
+        dataset = load_dataset('json', data_files=f'{data_file}/*.json', split='train')
+        dataset.shuffle(42)
         return dataset
 
-    def dynamic_collate(self, batch_samples):
+    def tokenizer_fn(self, batch_samples):
         """
         A collate function that tokenizes the inputs and targets, and applies dynamic padding and truncation
         based on the maximum length in the batch.
@@ -122,44 +108,25 @@ class ResDataLoader:
 
         inputs, targets = mapping_sample(batch_samples)
 
-        inp_tokens = self.tokenizer.batch_encode_plus(
-            inputs,
-            padding=True,
-            return_tensors="pt",
-            truncation=True,
+        model_inputs = self.tokenizer(inputs, padding='longest')
+        tgt_tokens = self.tokenizer(targets, padding='longest')
+
+        tgt_tokens["input_ids"] = [
+            [(l if l != self.tokenizer.pad_token_id else -100) for l in label] for label in tgt_tokens["input_ids"]
+        ]
+
+        model_inputs['labels'] = tgt_tokens["input_ids"]
+
+        return model_inputs
+
+    def process_fn(self, dataset):
+        dataset = dataset.map(
+            lambda example: self.tokenizer_fn(example),
+            batched=True, batch_size=self.batch_size,
+            num_proc=4,
+            load_from_cache_file=False,
+            remove_columns=['list_user_action', 'context', 'ontology', 'system_action', 'documents'],
+            desc='Tokenizer processing'
         )
-        tgt_tokens = self.tokenizer.batch_encode_plus(
-            targets,
-            padding=True,
-            return_tensors="pt",
-            truncation=True,
-        )
-        target_ids = tgt_tokens["input_ids"]
-        target_mask = tgt_tokens["attention_mask"].bool()
-        target_ids = target_ids.masked_fill(~target_mask, -100)
 
-        return {"input_ids": inp_tokens["input_ids"],
-                "attention_mask": inp_tokens["attention_mask"],
-                "labels": target_ids}
-
-    def get_dataloader(self, dataset, shuffle_flag: bool = False) -> DataLoader:
-        """
-        :param dataset: (Dataset): dataset from which to load the data.
-        :param shuffle_flag: set to ``True`` to have the data reshuffled
-                at every epoch (default: ``False``).
-        :return: a dataset
-        """
-        if shuffle_flag:
-            sampler = RandomSampler(data_source=dataset, generator=self.generator)
-        else:
-            sampler =  SequentialSampler(dataset)
-
-        dataloader = DataLoader(dataset,
-                                sampler=sampler,
-                                collate_fn=self.dynamic_collate,
-                                batch_size=self.batch_size,
-                                drop_last=True,
-                                num_workers=os.cpu_count(),
-                                pin_memory=True)
-
-        return dataloader
+        return dataset
