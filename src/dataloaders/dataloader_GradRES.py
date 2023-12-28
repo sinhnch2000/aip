@@ -125,7 +125,7 @@ class ResDataLoader:
             batched=True, batch_size=self.batch_size,
             num_proc=4,
             load_from_cache_file=False,
-            remove_columns=['list_user_action', 'context', 'ontology', 'system_action', 'documents'],
+            remove_columns=['instruction', 'context', 'ontology', 'system_action', 'documents'],
             desc='Tokenizer processing'
         )
 
