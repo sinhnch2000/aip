@@ -1,0 +1,33 @@
+CUDA_VISIBLE_DEVICES=0,1 accelerate launch \
+        --use_fsdp \
+        --mixed_precision=bf16 \
+        --fsdp_auto_wrap_policy=TRANSFORMER_BASED_WRAP  \
+        --fsdp_transformer_layer_cls_to_wrap="T5Block" \
+        --fsdp_sharding_strategy=1 \
+        --fsdp_state_dict_type=FULL_STATE_DICT \
+        -m src.train \
+            --model_name_or_path 'google/flan-t5-small' \
+            --output 'output/experience' \
+            --do_train \
+            --train_file '/kaggle/input/fusedchaat-res/FUSHEDCHAT/train.json' \
+            --max_train_samples 100000 \
+            --do_eval \
+            --validation_file '/kaggle/input/fusedchaat-res/FUSHEDCHAT/val.json' \
+            --max_eval_samples 500 \
+            --max_steps 50000 \
+            --max_target_length 400 \
+            --per_device_eval_batch_size 4 \
+            --per_device_train_batch_size 4 \
+            --gradient_accumulation_steps 1 \
+            --preprocessing_num_workers 2 \
+            --warmup_ratio 0.1 \
+            --learning_rate 5e-5 \
+            --weight_decay 0.01 \
+            --overwrite_output_dir \
+            --save_total_limit 10 \
+            --logging_steps 1 \
+            --save_steps 20 \
+            --overwrite_output_dir \
+            --report_to 'wandb' \
+            --prediction_loss_only \
+            --evaluation_strategy "steps"
