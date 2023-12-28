@@ -10,8 +10,10 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch \
             --output 'output/experience' \
             --do_train \
             --train_file 'GradSearch_v2/train' \
+            --max_train_samples 100000 \
             --do_eval \
             --validation_file 'GradSearch_v2/validation' \
+            --max_eval_samples 500 \
             --max_steps 50000 \
             --max_target_length 400 \
             --per_device_eval_batch_size 4 \
