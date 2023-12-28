@@ -9,10 +9,10 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch \
             --model_name_or_path 'google/flan-t5-small' \
             --output 'output/experience' \
             --do_train \
-            --train_file '/kaggle/input/fusedchaat-res/FUSHEDCHAT/train.json' \
+            --train_file '/kaggle/input/fusedchaat-res/FUSHEDCHAT/train/train.json' \
             --max_train_samples 100000 \
             --do_eval \
-            --validation_file '/kaggle/input/fusedchaat-res/FUSHEDCHAT/val.json' \
+            --validation_file '/kaggle/input/fusedchaat-res/FUSHEDCHAT/validation/val.json' \
             --max_eval_samples 500 \
             --max_steps 50000 \
             --max_target_length 400 \
