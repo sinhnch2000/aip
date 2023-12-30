@@ -1,6 +1,6 @@
 export NCCL_DEBUG=INFO
 
-CUDA_VISIBLE_DEVICES=0 accelerate launch --config_file /kaggle/working/aip/src/res/src/config/config_fsdp_t5.yaml src/res/src/models/train.py        \
+CUDA_VISIBLE_DEVICES=0 accelerate launch --config_file /kaggle/working/aip/src/res/src/config/config_fsdp_t5.yaml /kaggle/working/aip/src/res/src/train.py        \
         --module 'res' \
         --model_name "google/flan-t5-base" \
         --max_target_length 400 \
