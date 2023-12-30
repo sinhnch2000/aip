@@ -4,8 +4,8 @@ import argparse
 
 sys.path.insert(0, '/kaggle/working/aip/source/res')  # Add root directory here
 
-from src.dataloader_GradRes import ResDataLoader
-from src.dataloader_GradSearch import StateDataLoader
+from src.data.dataloader_GradRes import ResDataLoader
+from src.data.dataloader_GradSearch import StateDataLoader
 from training_loop import Trainer
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
