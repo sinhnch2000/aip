@@ -1,10 +1,11 @@
 import sys
 import os
 import argparse
-sys.path.insert(0,'/kaggle/working/aip/source/res/') #Add root directory here
 
-from src.data.dataloader_GradRes import ResDataLoader
-from src.data.dataloader_GradSearch import StateDataLoader
+sys.path.insert(0, '/kaggle/working/aip/source/res')  # Add root directory here
+
+from src.dataloader_GradRes import ResDataLoader
+from src.dataloader_GradSearch import StateDataLoader
 from training_loop import Trainer
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -14,24 +15,24 @@ def parse_args(args):
     parser = argparse.ArgumentParser()
     # Data
     parser.add_argument('--output_dir', type=str, help="The output directory to save")
-    parser.add_argument('--train_files', nargs='+', help= "Directory to train file (can be multiple files)")
+    parser.add_argument('--train_files', nargs='+', help="Directory to train file (can be multiple files)")
     parser.add_argument('--text_column', type=str, default='prompt',
                         help="The name of the column in the datasets containing the full texts .")
     parser.add_argument('--target_column', type=str, default='output',
                         help="The name of the column in the label containing the full texts .")
-    parser.add_argument('--val_files', nargs='+',required=True,
-                        help= "Directory to validation file (can be multiple files)")
+    parser.add_argument('--val_files', nargs='+', required=True,
+                        help="Directory to validation file (can be multiple files)")
     parser.add_argument('--test_files', nargs='+',
-                        help= "Directory to test file (can be multiple files)")
+                        help="Directory to test file (can be multiple files)")
     parser.add_argument('--batch_size', type=int, default=2, help="Batch size for the dataloader")
     parser.add_argument('--max_train_samples', type=int, default=None, help="Number of training samples")
     parser.add_argument('--max_eval_samples', type=int, default=None, help="Number of validation samples")
     parser.add_argument('--seed', type=int, default=42, help="A seed for reproducible training.")
 
     # Training
-    parser.add_argument('--module',type=str, default='dst', help='Module <dst> or <res>')
+    parser.add_argument('--module', type=str, default='dst', help='Module <dst> or <res>')
     parser.add_argument('--model_name', type=str, default="prakharz/DIAL-BART0",
-                        help ="Model name for fine-tuning")
+                        help="Model name for fine-tuning")
     parser.add_argument('--num_train_epochs', type=int, default=10,
                         help="number training epochs")
     parser.add_argument('--max_target_length', type=int, default=60,
@@ -47,11 +48,11 @@ def parse_args(args):
                         help="If the training should continue from a checkpoint folder. (can be bool or string)")
     parser.add_argument('--do_eval_per_epoch', action='store_true',
                         help="Whether to run evaluate per epoch.")
-    parser.add_argument('--report_to', type=str, default='wandb',help=(
-            'The integration to report the results and logs to. Supported platforms are `"tensorboard"`,'
-            ' `"wandb"`,'"mlflow"', `"comet_ml"` and `"clearml"`. Use `"all"` (default) to report to all integrations.'
-            "Only applicable when `--with_tracking` is passed."
-        ))
+    parser.add_argument('--report_to', type=str, default='wandb', help=(
+        'The integration to report the results and logs to. Supported platforms are `"tensorboard"`,'
+        ' `"wandb"`,'"mlflow"', `"comet_ml"` and `"clearml"`. Use `"all"` (default) to report to all integrations.'
+        "Only applicable when `--with_tracking` is passed."
+    ))
 
     # Optimizer
     parser.add_argument('--learning_rate', type=float, default=5e-5,
@@ -63,7 +64,8 @@ def parse_args(args):
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
     parser.add_argument('--lr_scheduler_type', type=str, default='linear', help="The scheduler type to use.",
-        choices=["linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"],)
+                        choices=["linear", "cosine", "cosine_with_restarts", "polynomial", "constant",
+                                 "constant_with_warmup"], )
 
     args = parser.parse_args(args)
 
@@ -77,7 +79,6 @@ def parse_args(args):
 
 
 def main(args):
-
     args = parse_args(args)
     dataloader_args = {
         "model_name": args.model_name,
@@ -110,11 +111,11 @@ def main(args):
         "max_target_length": args.max_target_length,
         "num_beams": args.num_beams,
         "weight_decay": args.weight_decay,
-        "per_device_batch_size":dataloaders.batch_size,
+        "per_device_batch_size": dataloaders.batch_size,
         "gradient_accumulation_steps": args.gradient_accumulation_steps,
         "do_eval_per_epoch": args.do_eval_per_epoch,
         "learning_rate": args.learning_rate,
-        "num_warmup_steps":args.num_warmup_steps,
+        "num_warmup_steps": args.num_warmup_steps,
     }
     trainer = Trainer(**trainer_args)
     trainer.train()
