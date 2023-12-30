@@ -1,13 +1,13 @@
 export NCCL_DEBUG=INFO
 
-CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file src/config/config_fsdp_t5.yaml src/models/train.py        \
+CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file /kaggle/working/aip/src/res/src/config/config_fsdp_t5.yaml src/models/train.py        \
         --module 'res' \
         --model_name "google/flan-t5-base" \
         --max_target_length 400 \
         --num_train_epochs 45 \
         --output_dir "./output/GradRes/30.12"  \
-        --train_files  "./data/interim/GradRes/FUSHEDCHAT/train.json"\
-        --val_files  "./data/interim/GradRes/FUSHEDCHAT/val.json"\
+        --train_files  "/kaggle/input/fusedchaat-res/FUSHEDCHAT - Copy/train/fusedchat_train.json"\
+        --val_files  "/kaggle/input/fusedchaat-res/FUSHEDCHAT - Copy/validation/fusedchat_val.json"\
         --batch_size  16 \
         --num_beams   4 \
         --weight_decay  0.3 \
