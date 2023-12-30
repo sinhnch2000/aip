@@ -1,13 +1,16 @@
-CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file src/config/config_fsdp.yaml src/models/train.py        \
+export NCCL_DEBUG=INFO
+
+CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file src/config/config_fsdp_t5.yaml src/models/train.py        \
         --module 'res' \
         --model_name "google/flan-t5-base" \
+        --max_target_length 400 \
         --num_train_epochs 45 \
-        --output_dir "./output/GradRes/30.06"  \
-        --train_files  "./data/interim/GradRes/KETOD/train.json" "./data/interim/GradRes/WOW/train.json" "./data/interim/GradRes/ORQuAC/train.json" "./data/interim/GradRes/FUSHEDCHAT/train.json"\
-        --val_files   "./data/interim/GradRes/KETOD/val.json" "./data/interim/GradRes/WOW/val.json" "./data/interim/GradRes/ORQuAC/val.json" "./data/interim/GradRes/FUSHEDCHAT/val.json"\
+        --output_dir "./output/GradRes/30.12"  \
+        --train_files  "./data/interim/GradRes/FUSHEDCHAT/train.json"\
+        --val_files  "./data/interim/GradRes/FUSHEDCHAT/val.json"\
         --batch_size  16 \
         --num_beams   4 \
-        --weight_decay  0.0 \
+        --weight_decay  0.3 \
         --learning_rate 3e-5 \
         --num_warmup_steps 1500 \
         --gradient_accumulation_steps 16 \
