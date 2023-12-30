@@ -1,3 +1,4 @@
+WANDB_API_KEY=0b39e2667775768150d99b18418fb63ca15b13bc \
 CUDA_VISIBLE_DEVICES=0,1 accelerate launch \
         --use_fsdp \
         --mixed_precision=bf16 \

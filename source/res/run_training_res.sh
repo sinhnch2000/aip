@@ -1,5 +1,5 @@
 export NCCL_DEBUG=INFO
-
+WANDB_API_KEY=0b39e2667775768150d99b18418fb63ca15b13bc \
 CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file /kaggle/working/aip/source/res/src/config/config_fsdp_t5.yaml /kaggle/working/aip/source/res/src/train.py        \
         --module 'res' \
         --model_name "google/flan-t5-base" \
