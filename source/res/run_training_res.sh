@@ -15,6 +15,5 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file /kaggle/working/aip/sou
         --num_warmup_steps 1500 \
         --gradient_accumulation_steps 16 \
         --with_tracking  \
-        --report_to wandb \
         --checkpointing_steps epoch \
         --do_eval_per_epoch
