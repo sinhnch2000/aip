@@ -8,8 +8,9 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file /kaggle/working/aip/sou
         --output_dir "./output/GradRes/30.12"  \
         --train_files  "/kaggle/input/fusedchaat-res/FUSHEDCHAT - Copy/train/fusedchat_train.json"\
         --val_files  "/kaggle/input/fusedchaat-res/FUSHEDCHAT - Copy/validation/fusedchat_val.json"\
-        --batch_size  6 \
-        --num_beams   4 \
+        --resume_from_checkpoint "/kaggle/input/ckpt-res/epoch_2/pytorch_model.bin" \
+        --batch_size  4 \
+        --num_beams  4 \
         --weight_decay  0.3 \
         --learning_rate 3e-5 \
         --num_warmup_steps 1500 \
